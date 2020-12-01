@@ -133,11 +133,15 @@ func NewStack() *Stack {
 
 func myAtoi(s string) int {
 
-	// NOTE: test10に対応できない
-	MAX_INT := int64(math.Pow(2, 31) - 1)
-	MIN_INT := int64(math.Pow(2, 31) * -1)
+	MaxInt := int64(math.Pow(2, 31) - 1)
+	MinInt := int64(math.Pow(2, 31) * -1)
+	MaxDigit := int(math.Log10(float64(MaxInt)))
 	runeList := NewStack()
-	s = strings.ReplaceAll(s, " ", "")
+	sList := strings.Fields(s)
+	if len(sList) == 0 {
+		return 0
+	}
+	s = sList[0]
 	for i, r := range s {
 		if (i == 0 && r == '-') || ('0' <= r && r <= '9') {
 			runeList.Push(r)
@@ -166,11 +170,20 @@ func myAtoi(s string) int {
 		}
 
 		for i := 0; i < length; i++ {
+
 			r, err := runeList.Pop()
 			if err != nil {
 				log.Fatal(err)
 			}
 			number := float64(r - 48)
+
+			if number > 0 && i > MaxDigit {
+				if minus {
+					result = MinInt * -1
+				} else {
+					result = MaxInt * -1
+				}
+			}
 			result += int64(number * math.Pow10(i))
 		}
 	}
@@ -179,10 +192,10 @@ func myAtoi(s string) int {
 		result *= -1
 	}
 
-	if result < MIN_INT {
-		result = MIN_INT
-	} else if result > MAX_INT {
-		result = MAX_INT
+	if result < MinInt {
+		result = MinInt
+	} else if result > MaxInt {
+		result = MaxInt
 	}
 
 	return int(result)
